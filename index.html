@@ -317,25 +317,29 @@
     .info-field input,.info-field select{padding:6px 9px;font-size:11px;background:#f8f9fa!important;}
     .info-grid{gap:7px;}
 
-    /* ── 핵심: textarea 내용 전체 표시 ── */
-    textarea {
-      overflow: visible !important;
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      resize: none !important;
-      font-size: 12px !important;
-      line-height: 1.7 !important;
-      padding: 8px 10px !important;
-      border: 1px solid #d0d7d4 !important;
-      border-radius: 5px !important;
-      background: #f8f9fa !important;
-      color: #2c3b37 !important;
-      white-space: pre-wrap !important;
-      word-break: break-word !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-      display: block !important;
+    /* ── textarea는 출력 시 숨김 (div로 교체됨) ── */
+    textarea { display:none !important; }
+    textarea[data-print-hidden] { display:none !important; }
+
+    /* ── 교체된 div: 내용 전체 표시 ── */
+    .print-text-div {
+      display:block !important;
+      width:100% !important;
+      min-height:24px !important;
+      height:auto !important;
+      max-height:none !important;
+      overflow:visible !important;
+      padding:8px 10px !important;
+      border:1px solid #d0d7d4 !important;
+      border-radius:5px !important;
+      background:#f8f9fa !important;
+      color:#2c3b37 !important;
+      font-size:12px !important;
+      font-family:'Noto Sans KR',sans-serif !important;
+      line-height:1.7 !important;
+      white-space:pre-wrap !important;
+      word-break:break-word !important;
+      box-sizing:border-box !important;
     }
   }
 </style>
@@ -1806,45 +1810,34 @@
     pages.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='block'; });
     document.getElementById('pdfHeader').style.display='flex';
 
-    // 2. textarea → div 교체 (내용이 잘리지 않도록)
-    const replaced = [];
+    // 2. 모든 textarea를 .print-text-div 로 교체
+    const swapped = [];
     document.querySelectorAll('textarea').forEach(ta => {
       const div = document.createElement('div');
       div.className = 'print-text-div';
+      // 내용 설정 (줄바꿈 유지)
       div.textContent = ta.value || '';
-      div.style.cssText = [
-        'width:100%',
-        'min-height:20px',
-        'padding:8px 10px',
-        'border:1px solid #d0d7d4',
-        'border-radius:5px',
-        'background:#f8f9fa',
-        'color:#2c3b37',
-        'font-size:12px',
-        'font-family:Noto Sans KR,sans-serif',
-        'line-height:1.7',
-        'white-space:pre-wrap',
-        'word-break:break-word',
-        'box-sizing:border-box'
-      ].join(';');
+      // textarea 바로 앞에 div 삽입 후 textarea 숨김
       ta.parentNode.insertBefore(div, ta);
-      ta.style.display = 'none';
-      replaced.push({ div, ta });
+      ta.setAttribute('data-print-hidden', '1');
+      swapped.push({ div, ta });
     });
 
+    // 3. 렌더링 대기 후 인쇄
     setTimeout(() => {
       window.print();
-      // 3. 인쇄 후 원복
+
+      // 4. 인쇄 완료 후 원복
       setTimeout(() => {
-        replaced.forEach(({ div, ta }) => {
-          ta.style.display = '';
-          div.parentNode.removeChild(div);
+        swapped.forEach(({ div, ta }) => {
+          ta.removeAttribute('data-print-hidden');
+          if(div.parentNode) div.parentNode.removeChild(div);
         });
         document.getElementById('pdfHeader').style.display = 'none';
         showPage(cur);
-        showToast('📄 PDF 저장 완료', '#c0392b');
-      }, 500);
-    }, 400);
+        showToast('📄 PDF 저장이 완료되었습니다', '#c0392b');
+      }, 800);
+    }, 500);
   }
 
   /* ── 토스트 ── */
