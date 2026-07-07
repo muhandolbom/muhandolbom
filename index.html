@@ -1801,21 +1801,50 @@
   /* ── PDF 인쇄 ── */
   function doPrint(){
     closePdfModal();
-    pages.forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='block';});
+
+    // 1. 모든 페이지 표시
+    pages.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='block'; });
     document.getElementById('pdfHeader').style.display='flex';
-    // 인쇄 직전 textarea 높이를 scrollHeight로 강제 설정
-    document.querySelectorAll('textarea').forEach(el=>{
-      el.style.height='auto';
-      el.style.height=el.scrollHeight+'px';
+
+    // 2. textarea → div 교체 (내용이 잘리지 않도록)
+    const replaced = [];
+    document.querySelectorAll('textarea').forEach(ta => {
+      const div = document.createElement('div');
+      div.className = 'print-text-div';
+      div.textContent = ta.value || '';
+      div.style.cssText = [
+        'width:100%',
+        'min-height:20px',
+        'padding:8px 10px',
+        'border:1px solid #d0d7d4',
+        'border-radius:5px',
+        'background:#f8f9fa',
+        'color:#2c3b37',
+        'font-size:12px',
+        'font-family:Noto Sans KR,sans-serif',
+        'line-height:1.7',
+        'white-space:pre-wrap',
+        'word-break:break-word',
+        'box-sizing:border-box'
+      ].join(';');
+      ta.parentNode.insertBefore(div, ta);
+      ta.style.display = 'none';
+      replaced.push({ div, ta });
     });
-    setTimeout(()=>{
+
+    setTimeout(() => {
       window.print();
-      setTimeout(()=>{
-        document.getElementById('pdfHeader').style.display='none';
+      // 3. 인쇄 후 원복
+      setTimeout(() => {
+        replaced.forEach(({ div, ta }) => {
+          ta.style.display = '';
+          div.parentNode.removeChild(div);
+        });
+        document.getElementById('pdfHeader').style.display = 'none';
         showPage(cur);
-        showToast('📄 PDF 저장 완료','var(--red)');
-      },500);
-    },400);
+        showToast('📄 PDF 저장 완료', '#c0392b');
+      }, 500);
+    }, 400);
   }
 
   /* ── 토스트 ── */
