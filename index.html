@@ -96,9 +96,14 @@
   .fh-icon{width:32px;height:32px;background:rgba(255,255,255,0.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
   .final-body{padding:17px 22px;display:grid;gap:13px;}
   .final-field label{display:block;font-size:12px;font-weight:700;color:var(--gray-600);margin-bottom:6px;}
-  .final-field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:13px;font-family:'Noto Sans KR',sans-serif;color:var(--gray-800);background:var(--gray-50);resize:none;min-height:88px;line-height:1.7;transition:border-color 0.2s;}
-  .final-field textarea:focus{outline:none;border-color:var(--primary);background:white;}
-  .final-field textarea::placeholder{color:var(--gray-400);}
+  .final-field textarea{display:none;}
+  .editable-div{width:100%;min-height:65px;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:13px;font-family:'Noto Sans KR',sans-serif;color:var(--gray-800);background:var(--gray-50);line-height:1.7;outline:none;white-space:pre-wrap;word-break:break-word;box-sizing:border-box;cursor:text;}
+  .editable-div:focus{border-color:var(--primary);background:white;}
+  .editable-div:empty::before{content:attr(data-placeholder);color:var(--gray-400);pointer-events:none;}
+  /* PDF 출력 시 그대로 표시 */
+  @media print{
+    .editable-div{border:1px solid #d0d7d4!important;background:#f8f9fa!important;font-size:12px!important;min-height:0!important;padding:8px 10px!important;}
+  }
 
   .action-section{background:white;border-radius:var(--radius);margin-bottom:16px;box-shadow:var(--shadow);overflow:hidden;}
   .action-header{padding:15px 22px;background:#2c3b37;color:white;display:flex;align-items:center;gap:11px;}
@@ -316,30 +321,21 @@
     .schedule-grid{grid-template-columns:1fr 1fr;}
     .info-field input,.info-field select{padding:6px 9px;font-size:11px;background:#f8f9fa!important;}
     .info-grid{gap:7px;}
-
-    /* ── textarea는 출력 시 숨김 (div로 교체됨) ── */
-    textarea { display:none !important; }
-    textarea[data-print-hidden] { display:none !important; }
-
-    /* ── 교체된 div: 내용 전체 표시 ── */
-    .print-text-div {
-      display:block !important;
-      width:100% !important;
-      min-height:24px !important;
-      height:auto !important;
-      max-height:none !important;
-      overflow:visible !important;
-      padding:8px 10px !important;
-      border:1px solid #d0d7d4 !important;
-      border-radius:5px !important;
-      background:#f8f9fa !important;
-      color:#2c3b37 !important;
-      font-size:12px !important;
-      font-family:'Noto Sans KR',sans-serif !important;
-      line-height:1.7 !important;
-      white-space:pre-wrap !important;
-      word-break:break-word !important;
-      box-sizing:border-box !important;
+    .chk-label{font-size:11px;padding:3px 8px;}
+    .adl-table{font-size:11px;}
+    .adl-table th{padding:6px 8px;}
+    .adl-table td{padding:6px 8px;}
+    /* editable-div: 내용 크기대로 자동 확장 */
+    .editable-div{
+      border:1px solid #d0d7d4!important;
+      background:#f8f9fa!important;
+      font-size:12px!important;
+      min-height:0!important;
+      padding:8px 10px!important;
+      white-space:pre-wrap!important;
+      word-break:break-word!important;
+      height:auto!important;
+      overflow:visible!important;
     }
   }
 </style>
@@ -1008,11 +1004,11 @@
       <div class="section-card">
         <div class="section-header"><div class="section-num" style="font-size:10px;">욕구</div><div><div class="section-title">주요 욕구</div><div class="section-desc">영역별로 대상자의 주요 욕구를 기록하세요</div></div></div>
         <div style="padding:14px 22px;display:grid;gap:10px;">
-          <div class="final-field"><label>🏠 주거환경</label><textarea id="need_house" placeholder="주거환경 관련 주요 욕구 기록…" style="min-height:65px;"></textarea></div>
-          <div class="final-field"><label>🙌 일상생활</label><textarea id="need_adl" placeholder="일상생활 관련 주요 욕구 기록…" style="min-height:65px;"></textarea></div>
-          <div class="final-field"><label>🍚 식사기능</label><textarea id="need_meal" placeholder="식사·영양 관련 주요 욕구 기록…" style="min-height:65px;"></textarea></div>
-          <div class="final-field"><label>🧠 인지심리</label><textarea id="need_cog" placeholder="인지·심리 관련 주요 욕구 기록…" style="min-height:65px;"></textarea></div>
-          <div class="final-field"><label>🏥 건강영역</label><textarea id="need_med" placeholder="의료·건강 관련 주요 욕구 기록…" style="min-height:65px;"></textarea></div>
+          <div class="final-field"><label>🏠 주거환경</label><div class="editable-div" id="need_house" contenteditable="true" data-placeholder="주거환경 관련 주요 욕구 기록…"></div></div>
+          <div class="final-field"><label>🙌 일상생활</label><div class="editable-div" id="need_adl" contenteditable="true" data-placeholder="일상생활 관련 주요 욕구 기록…"></div></div>
+          <div class="final-field"><label>🍚 식사기능</label><div class="editable-div" id="need_meal" contenteditable="true" data-placeholder="식사·영양 관련 주요 욕구 기록…"></div></div>
+          <div class="final-field"><label>🧠 인지심리</label><div class="editable-div" id="need_cog" contenteditable="true" data-placeholder="인지·심리 관련 주요 욕구 기록…"></div></div>
+          <div class="final-field"><label>🏥 건강영역</label><div class="editable-div" id="need_med" contenteditable="true" data-placeholder="의료·건강 관련 주요 욕구 기록…"></div></div>
         </div>
       </div>
 
@@ -1022,11 +1018,11 @@
         <div class="final-body">
           <div class="final-field">
             <label>🗣️ 당사자 표현욕구</label>
-            <textarea id="f_complaint" placeholder="대상자가 직접 표현한 어려움, 불편함, 바라는 점을 있는 그대로 기록하세요…" style="min-height:110px;"></textarea>
+            <div class="editable-div" id="f_complaint" contenteditable="true" data-placeholder="대상자가 직접 표현한 어려움, 불편함, 바라는 점을 있는 그대로 기록하세요…" style="min-height:110px;"></div>
           </div>
           <div class="final-field">
             <label>💼 담당자 종합의견</label>
-            <textarea id="f_opinion" placeholder="조사자가 대상자(보호자)의 현재 생활현황, 필요 서비스, 제공되어야 할 서비스 내용을 종합적으로 기입합니다…" style="min-height:130px;"></textarea>
+            <div class="editable-div" id="f_opinion" contenteditable="true" data-placeholder="조사자가 대상자(보호자)의 현재 생활현황, 필요 서비스, 제공되어야 할 서비스 내용을 종합적으로 기입합니다…" style="min-height:130px;"></div>
           </div>
         </div>
       </div>
@@ -1375,7 +1371,13 @@
       hosp:checkState['r_hosp']||'-',
     };
   }
-  function v(id){const el=document.getElementById(id);return el?el.value.trim():'';}
+  function v(id){
+    const el=document.getElementById(id);
+    if(!el) return '';
+    // contenteditable div는 textContent로 읽기
+    if(el.contentEditable==='true') return el.innerText.trim();
+    return el.value ? el.value.trim() : '';
+  }
 
   /* ── 편집 상태 ── */
   let editingId = null; // 수정 중인 기록 id (null이면 새 작성)
@@ -1409,6 +1411,7 @@
   function resetForm(keepEditingId){
     if(!keepEditingId) editingId=null;
     updateFormMode(!!keepEditingId);
+    document.querySelectorAll('.editable-div').forEach(el=>{ el.innerText=''; });
     document.querySelectorAll('#formApp input[type=text], #formApp input[type=tel], #formApp input[type=date], #formApp textarea').forEach(el=>el.value='');
     document.querySelectorAll('.adl-btn').forEach(b=>b.classList.remove('sel-0','sel-1','sel-2'));
     Object.keys(adlScores).forEach(k=>delete adlScores[k]);
@@ -1680,7 +1683,12 @@
     resetForm(true);
 
     // ── 텍스트 입력 ──
-    const sv = (elId, val) => { const el=document.getElementById(elId); if(el && val!=null) el.value = val; };
+    const sv = (elId, val) => {
+      const el=document.getElementById(elId);
+      if(!el || val==null) return;
+      if(el.contentEditable==='true') el.innerText = val;
+      else el.value = val;
+    };
     sv('f_org',r.org); sv('f_date',r.date); sv('f_worker',r.worker);
     sv('f_name',r.name); sv('f_birth',r.birth); sv('f_age',r.age);
     sv('f_tel',r.tel); sv('f_tel_home',r.tel_home); sv('f_tel_em',r.tel_em); sv('f_tel_em_rel',r.tel_em_rel);
@@ -1805,39 +1813,17 @@
   /* ── PDF 인쇄 ── */
   function doPrint(){
     closePdfModal();
-
-    // 1. 모든 페이지 표시
+    // 모든 페이지 표시
     pages.forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='block'; });
     document.getElementById('pdfHeader').style.display='flex';
-
-    // 2. 모든 textarea를 .print-text-div 로 교체
-    const swapped = [];
-    document.querySelectorAll('textarea').forEach(ta => {
-      const div = document.createElement('div');
-      div.className = 'print-text-div';
-      // 내용 설정 (줄바꿈 유지)
-      div.textContent = ta.value || '';
-      // textarea 바로 앞에 div 삽입 후 textarea 숨김
-      ta.parentNode.insertBefore(div, ta);
-      ta.setAttribute('data-print-hidden', '1');
-      swapped.push({ div, ta });
-    });
-
-    // 3. 렌더링 대기 후 인쇄
-    setTimeout(() => {
+    setTimeout(()=>{
       window.print();
-
-      // 4. 인쇄 완료 후 원복
-      setTimeout(() => {
-        swapped.forEach(({ div, ta }) => {
-          ta.removeAttribute('data-print-hidden');
-          if(div.parentNode) div.parentNode.removeChild(div);
-        });
-        document.getElementById('pdfHeader').style.display = 'none';
+      setTimeout(()=>{
+        document.getElementById('pdfHeader').style.display='none';
         showPage(cur);
-        showToast('📄 PDF 저장이 완료되었습니다', '#c0392b');
-      }, 800);
-    }, 500);
+        showToast('📄 PDF 저장이 완료되었습니다','#c0392b');
+      },500);
+    },400);
   }
 
   /* ── 토스트 ── */
